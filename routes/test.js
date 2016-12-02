@@ -6,8 +6,13 @@ const pool = require('mysql').createPool(config.mysql);;
 
 
 router.get('/', function* () {
-	this.body = "世界你好！";
+	console.log("first:" + this.session.views);
+	var n = this.session.views || 0;
+	this.session.views = ++n;
+	console.log("second:" + this.session.views);
+	this.body = "访问了" + this.session.views + "次";
 });
+
 
 router.get('/other/:id', function* () {
 	this.body = 'id: ' + this.params.id;

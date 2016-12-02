@@ -19,9 +19,29 @@ module.exports = function (app, root) {
       }
     }
   });
-  /*router.get('/', function* () {
-    this.body = '这个是根目录';
-  });*/
+  /*抓住网页的异常*/
+  app.use(function* (next) {
+    try {
+      yield next;
+    } catch (err) {
+      this.status = err.status || 500;
+      this.body = err.message;
+      //this.body = "页面存在异常，请联系管理员！";
+      this.app.emit('error', err, this);
+    }
+  });
+  router.get('/', function* () {
+    this.body = '这个是网站根目录';
+  });
   app.use(router.routes());
+  /*访问路径不存在的时候跳转到404*/
+  app.use(function* (next) {
+    if (404 != this.status) return;
+    this.redirect('/404');
+  });
+  /*把异常抛给以一个中间件处理*/
+  app.use(function* (next) {
+    this.throw('Error Message', 500);
+  });
   logger.debug('Finish loading routes.');
 };
